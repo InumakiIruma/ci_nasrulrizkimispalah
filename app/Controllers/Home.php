@@ -6,6 +6,6 @@ class Home extends BaseController
 {
     public function index(): string
     {
-        return view('layout/dashboard');
+        return view('layouts/dashboard');
     }
 }
