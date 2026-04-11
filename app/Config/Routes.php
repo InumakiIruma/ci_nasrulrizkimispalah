@@ -6,50 +6,61 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-// Variabel Filter
+// --- 1. Variabel Filter ---
 $authFilter = ['filter' => 'auth'];
 
-// Variabel Role
-$admin     = ['filter' => 'role:admin'];
-$petugas     = ['filter' => 'role:petugas'];
-$anggota     = ['filter' => 'role:anggota'];
-$allRole   = ['filter' => 'role:admin, petugas, anggota'];
-
-// Login
+// --- 2. Auth (Login/Logout) ---
 $routes->get('/login', 'Auth::login');
 $routes->post('/proses-login', 'Auth::prosesLogin');
 $routes->get('/logout', 'Auth::logout');
 
-// Halaman utama
+// --- 3. Halaman Utama / Dashboard ---
 $routes->get('/', 'Home::index', $authFilter);
 $routes->get('/dashboard', 'Home::index', $authFilter);
 
-// Daftar alat
-$routes->get('/alat', 'Alat::index');
+// --- 4. Profile ---
+$routes->get('/profile', 'Users::profile', $authFilter);
+$routes->post('/profile/update', 'Users::updateProfile', $authFilter);
 
-// Kategori
-$routes->get('/kategori', 'Kategori::index');
-$routes->post('/kategori/simpan', 'Kategori::simpan');
-$routes->get('/kategori/hapus/(:num)', 'Kategori::hapus/$1');
+// --- 5. Manajemen Alat ---
+$routes->group('alat', $authFilter, function ($routes) {
+    $routes->get('/', 'Alat::index');
+    $routes->post('simpan', 'Alat::simpan');
+});
 
-// Route untuk halaman utama peminjaman (Tampilan Card)
-$routes->get('/peminjaman', 'Peminjaman::index');
+// --- 6. Kategori Alat ---
+$routes->group('kategori', $authFilter, function ($routes) {
+    $routes->get('/', 'Kategori::index');
+    $routes->post('simpan', 'Kategori::simpan');
+    $routes->get('hapus/(:num)', 'Kategori::hapus/$1');
+});
 
-// Route untuk memproses form dari modal
-$routes->post('/peminjaman/proses', 'Peminjaman::proses');
+// --- 7. Transaksi (Peminjaman & Pengembalian) ---
+$routes->group('peminjaman', $authFilter, function ($routes) {
+    $routes->get('/', 'Peminjaman::index'); // URL: /peminjaman
+    $routes->post('proses', 'Peminjaman::proses'); // URL: /peminjaman/proses
+    $routes->get('log', 'Peminjaman::log');
 
-// Route untuk melihat daftar yang sedang dipinjam (Log)
-$routes->get('/peminjaman/log', 'Peminjaman::log');
+    // --- FIX DI SINI ---
+    // Route ini sekarang bisa diakses di /peminjaman/detail/1 dan /peminjaman/konfirmasi/1
+    $routes->get('detail/(:num)', 'Peminjaman::detail/$1');
+    $routes->get('konfirmasi/(:num)', 'Peminjaman::konfirmasi/$1');
+    $routes->get('kembalikan/(:num)', 'Peminjaman::kembalikan/$1');
+});
 
-// Jika ingin Dashboard muncul saat buka domain utama
-$routes->get('/', 'Admin::index');
+// Route Pengembalian
+$routes->get('/pengembalian', 'Peminjaman::pengembalian', $authFilter);
 
-// Atau jika ingin diakses via url /admin
-$routes->get('/admin', 'Admin::index');
+// --- 8. Laporan Bulanan ---
+$routes->group('laporan', $authFilter, function ($routes) {
+    $routes->get('/', 'Laporan::index');
+    $routes->get('filter', 'Laporan::index');
+});
 
-// Simpan
-$routes->post('/alat/simpan', 'Alat::simpan');
-
-// Tambah user
-$routes->get('/users/create', 'Users::create'); // form tambah user
-$routes->post('/users/store', 'Users::store'); // aksi simpan user
+// --- 9. Manajemen User ---
+$routes->group('users', $authFilter, function ($routes) {
+    $routes->get('/', 'Users::index');
+    $routes->get('create', 'Users::create');
+    $routes->post('store', 'Users::store');
+    $routes->get('hapus/(:num)', 'Users::hapus/$1');
+});
