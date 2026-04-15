@@ -37,7 +37,7 @@
                         <i class="bi bi-tools text-muted opacity-25" style="font-size: 4rem;"></i>
 
                         <?php if ($a['stok'] <= 0) : ?>
-                            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center">
+                            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style="z-index: 1;">
                                 <span class="badge bg-danger px-3 py-2 rounded-pill shadow">Stok Habis</span>
                             </div>
                         <?php endif; ?>
@@ -64,7 +64,7 @@
                         <button class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm transition-base"
                             data-bs-toggle="modal"
                             data-bs-target="#modalPinjam"
-                            onclick="setAlat('<?= $a['id']; ?>', '<?= $a['nama_alat']; ?>')"
+                            onclick="setAlat('<?= $a['id']; ?>', '<?= $a['nama_alat']; ?>', '<?= $a['stok']; ?>')"
                             <?= ($a['stok'] <= 0) ? 'disabled' : '' ?>>
                             <i class="bi bi-plus-circle me-2"></i> Pinjam Alat
                         </button>
@@ -117,10 +117,11 @@
 
                     <div class="mb-2">
                         <label class="form-label fw-bold small text-muted text-uppercase mb-2">Jumlah Item</label>
-                        <div class="input-group" style="max-width: 150px;">
+                        <div class="input-group" style="max-width: 170px;">
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-hash"></i></span>
-                            <input type="number" name="jumlah" class="form-control border-start-0" value="1" min="1" required>
+                            <input type="number" name="jumlah" id="jumlah_input" class="form-control border-start-0" value="1" min="1" required>
                         </div>
+                        <small class="text-muted mt-1 d-block" id="stok_info"></small>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
@@ -135,17 +136,22 @@
 </div>
 
 <script>
-    function setAlat(id, nama) {
+    function setAlat(id, nama, stok) {
         document.getElementById('id_alat').value = id;
         document.getElementById('nama_alat_display').value = nama;
+
+        // Update validasi jumlah berdasarkan stok tersedia
+        const inputJumlah = document.getElementById('jumlah_input');
+        inputJumlah.max = stok;
+        inputJumlah.value = 1; // reset ke 1
+
+        document.getElementById('stok_info').innerText = "* Maksimal pinjam: " + stok + " item";
     }
 </script>
 
 <style>
-    /* Card Animation */
     .card-hover {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: default;
     }
 
     .card-hover:hover {
@@ -153,13 +159,11 @@
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12) !important;
     }
 
-    /* Soft Color for Category */
     .bg-soft-primary {
         background-color: #eef2ff;
         color: #4361ee;
     }
 
-    /* Button Shadow and Transition */
     .shadow-primary {
         box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
     }
@@ -170,23 +174,6 @@
 
     .btn:active {
         transform: scale(0.96);
-    }
-
-    /* Modal Styling */
-    .form-control {
-        border-radius: 10px;
-        padding: 0.6rem 1rem;
-        border-color: #e2e8f0;
-    }
-
-    .form-control:focus {
-        border-color: #4361ee;
-        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.1);
-    }
-
-    .input-group-text {
-        border-radius: 10px;
-        border-color: #e2e8f0;
     }
 </style>
 

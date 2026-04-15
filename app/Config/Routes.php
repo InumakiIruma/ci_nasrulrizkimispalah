@@ -64,3 +64,9 @@ $routes->group('users', $authFilter, function ($routes) {
     $routes->post('store', 'Users::store');
     $routes->get('hapus/(:num)', 'Users::hapus/$1');
 });
+$routes->get('peminjaman/history', 'Peminjaman::history');
+
+
+$routes->get('peminjaman/pengembalian', 'Peminjaman::pengembalian');
+$routes->get('peminjaman/kembalikan/(:num)', 'Peminjaman::kembalikan/$1');
+$routes->get('peminjaman/history', 'Peminjaman::history');
