@@ -37,21 +37,29 @@ $routes->group('kategori', $authFilter, function ($routes) {
 
 // --- 7. Transaksi (Peminjaman & Pengembalian) ---
 $routes->group('peminjaman', $authFilter, function ($routes) {
-    $routes->get('/', 'Peminjaman::index'); // URL: /peminjaman
-    $routes->post('proses', 'Peminjaman::proses'); // URL: /peminjaman/proses
-    $routes->get('log', 'Peminjaman::log');
-
-    // --- FIX DI SINI ---
-    // Route ini sekarang bisa diakses di /peminjaman/detail/1 dan /peminjaman/konfirmasi/1
-    $routes->get('detail/(:num)', 'Peminjaman::detail/$1');
+    // Alur Utama Peminjaman
+    $routes->get('/', 'Peminjaman::index');
+    $routes->post('proses', 'Peminjaman::proses');
+    $routes->get('permintaan', 'Peminjaman::permintaan');
     $routes->get('konfirmasi/(:num)', 'Peminjaman::konfirmasi/$1');
+
+    // --- Tambahan ( Aksi tolak peminjaman ) ------
+    $routes->get('tolak/(:num)', 'Peminjaman::tolak/$1');
+
+    // Alur Pengembalian
+    $routes->get('pengembalian', 'Peminjaman::pengembalian');
     $routes->get('kembalikan/(:num)', 'Peminjaman::kembalikan/$1');
+
+    // Informasi & Riwayat
+    $routes->get('history', 'Peminjaman::history');
+    $routes->get('detail/(:num)', 'Peminjaman::detail/$1');
+    $routes->get('log', 'Peminjaman::log');
 });
 
-// Route Pengembalian
+// Route Alias (Menjaga agar /pengembalian tanpa prefix tetap jalan)
 $routes->get('/pengembalian', 'Peminjaman::pengembalian', $authFilter);
 
-// --- 8. Laporan Bulanan ---
+// --- 8. Laporan ---
 $routes->group('laporan', $authFilter, function ($routes) {
     $routes->get('/', 'Laporan::index');
     $routes->get('filter', 'Laporan::index');
@@ -64,9 +72,3 @@ $routes->group('users', $authFilter, function ($routes) {
     $routes->post('store', 'Users::store');
     $routes->get('hapus/(:num)', 'Users::hapus/$1');
 });
-$routes->get('peminjaman/history', 'Peminjaman::history');
-
-
-$routes->get('peminjaman/pengembalian', 'Peminjaman::pengembalian');
-$routes->get('peminjaman/kembalikan/(:num)', 'Peminjaman::kembalikan/$1');
-$routes->get('peminjaman/history', 'Peminjaman::history');

@@ -22,7 +22,7 @@
 
                 <div class="ms-2 flex-grow-1 overflow-hidden" style="min-width: 0;">
                     <p class="mb-0 fw-bold text-dark small text-truncate" title="<?= session()->get('nama') ?>">
-                        <?= session()->get('nama') ?: 'Administrator' ?>
+                        <?= session()->get('nama') ?: 'Guest' ?>
                     </p>
                     <?php
                     $role = session()->get('role');
@@ -35,7 +35,6 @@
                         </span>
                     </div>
                 </div>
-
                 <i class="bi bi-chevron-right text-muted small flex-shrink-0 ms-1"></i>
             </div>
         </a>
@@ -43,24 +42,9 @@
 
     <ul class="nav flex-column custom-nav">
         <li class="nav-item">
-            <a class="nav-link <?= (uri_string() == '' || uri_string() == '/') ? 'active' : '' ?>" href="<?= base_url('/') ?>">
+            <a class="nav-link <?= (uri_string() == '' || uri_string() == 'dashboard') ? 'active' : '' ?>" href="<?= base_url('/') ?>">
                 <i class="bi bi-grid-1x2-fill flex-shrink-0"></i>
                 <span class="text-truncate">Dashboard</span>
-            </a>
-        </li>
-
-        <div class="nav-divider">Manajemen Alat</div>
-
-        <li class="nav-item">
-            <a class="nav-link <?= (uri_string() == 'alat') ? 'active' : '' ?>" href="<?= base_url('/alat') ?>">
-                <i class="bi bi-tools flex-shrink-0"></i>
-                <span class="text-truncate">Daftar Alat</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= (uri_string() == 'kategori') ? 'active' : '' ?>" href="<?= base_url('/kategori') ?>">
-                <i class="bi bi-tags-fill flex-shrink-0"></i>
-                <span class="text-truncate">Kategori Alat</span>
             </a>
         </li>
 
@@ -68,28 +52,60 @@
 
         <li class="nav-item">
             <a class="nav-link <?= (uri_string() == 'peminjaman') ? 'active' : '' ?>" href="<?= base_url('/peminjaman') ?>">
-                <i class="bi bi-cart-check-fill flex-shrink-0"></i>
-                <span class="text-truncate">Peminjaman</span>
-                <span class="badge rounded-pill bg-danger shadow-sm ms-auto flex-shrink-0">3</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= (uri_string() == 'pengembalian') ? 'active' : '' ?>" href="<?= base_url('/pengembalian') ?>">
-                <i class="bi bi-arrow-return-left flex-shrink-0"></i>
-                <span class="text-truncate">Pengembalian</span>
+                <i class="bi bi-cart-plus-fill flex-shrink-0"></i>
+                <span class="text-truncate">Pilih Alat</span>
             </a>
         </li>
 
-        <div class="nav-divider">Laporan & User</div>
-
         <li class="nav-item">
-            <a class="nav-link <?= (uri_string() == 'laporan') ? 'active' : '' ?>" href="<?= base_url('/laporan') ?>">
-                <i class="bi bi-file-earmark-bar-graph-fill flex-shrink-0"></i>
-                <span class="text-truncate">Laporan</span>
+            <a class="nav-link <?= (uri_string() == 'peminjaman/history') ? 'active' : '' ?>" href="<?= base_url('/peminjaman/history') ?>">
+                <i class="bi bi-clock-history flex-shrink-0"></i>
+                <span class="text-truncate">Riwayat Saya</span>
             </a>
         </li>
 
         <?php if (session()->get('role') == 'admin') : ?>
+
+            <div class="nav-divider text-primary">Panel Admin</div>
+
+            <li class="nav-item">
+                <a class="nav-link <?= (uri_string() == 'peminjaman/permintaan') ? 'active' : '' ?>" href="<?= base_url('peminjaman/permintaan') ?>">
+                    <i class="bi bi-bell-fill flex-shrink-0"></i>
+                    <span class="text-truncate">Permintaan Pinjam</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link <?= (uri_string() == 'peminjaman/pengembalian') ? 'active' : '' ?>" href="<?= base_url('/peminjaman/pengembalian') ?>">
+                    <i class="bi bi-arrow-return-left flex-shrink-0"></i>
+                    <span class="text-truncate">Pengembalian</span>
+                </a>
+            </li>
+
+            <div class="nav-divider">Data Master</div>
+
+            <li class="nav-item">
+                <a class="nav-link <?= (uri_string() == 'alat') ? 'active' : '' ?>" href="<?= base_url('/alat') ?>">
+                    <i class="bi bi-tools flex-shrink-0"></i>
+                    <span class="text-truncate">Daftar Alat</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= (uri_string() == 'kategori') ? 'active' : '' ?>" href="<?= base_url('/kategori') ?>">
+                    <i class="bi bi-tags-fill flex-shrink-0"></i>
+                    <span class="text-truncate">Kategori Alat</span>
+                </a>
+            </li>
+
+            <div class="nav-divider">Laporan & User</div>
+
+            <li class="nav-item">
+                <a class="nav-link <?= (uri_string() == 'laporan') ? 'active' : '' ?>" href="<?= base_url('/laporan') ?>">
+                    <i class="bi bi-file-earmark-bar-graph-fill flex-shrink-0"></i>
+                    <span class="text-truncate">Laporan</span>
+                </a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link <?= (uri_string() == 'users') ? 'active' : '' ?>" href="<?= base_url('/users') ?>">
                     <i class="bi bi-people-fill flex-shrink-0"></i>
@@ -97,7 +113,6 @@
                 </a>
             </li>
         <?php endif; ?>
-
         <hr class="my-4 mx-2 opacity-25">
 
         <li class="nav-item mb-4">
@@ -110,7 +125,7 @@
 </div>
 
 <style>
-    /* Pengaturan Utama Sidebar */
+    /* Styling tetap sama sesuai code yang kamu berikan agar desain tidak berubah */
     .sidebar-wrapper {
         background-color: #ffffff !important;
         min-height: 100vh;
@@ -119,7 +134,6 @@
         font-family: 'Inter', sans-serif;
     }
 
-    /* Brand Logo */
     .brand-icon-box {
         width: 35px;
         height: 35px;
@@ -134,7 +148,6 @@
         box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
     }
 
-    /* Profile Card */
     .profile-card {
         background: #f8fafc;
         border: 1px solid #eef2f6;
@@ -159,7 +172,6 @@
         border-radius: 50%;
     }
 
-    /* Role Label */
     .role-label {
         font-size: 8px;
         font-weight: 800;
@@ -181,7 +193,6 @@
         color: #16a34a;
     }
 
-    /* Navigation Styling */
     .custom-nav .nav-link {
         display: flex;
         align-items: center;
@@ -205,15 +216,10 @@
         box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
     }
 
-    /* Penanganan Teks Meluber */
     .text-truncate {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-
-    .flex-shrink-0 {
-        flex-shrink: 0 !important;
     }
 
     .nav-divider {
