@@ -116,9 +116,8 @@
         <hr class="my-4 mx-2 opacity-25">
 
         <li class="nav-item mb-4">
-            <a class="nav-link logout-btn text-danger fw-bold" href="<?= base_url('/logout') ?>" onclick="return confirm('Yakin ingin keluar?')">
-                <i class="bi bi-box-arrow-right flex-shrink-0"></i>
-                <span class="text-truncate">Keluar Sistem</span>
+            <a class="nav-link logout-btn text-danger fw-bold" href="<?= base_url('/logout') ?>">
+                <i class="bi bi-box-arrow-right"></i> Keluar Sistem
             </a>
         </li>
     </ul>

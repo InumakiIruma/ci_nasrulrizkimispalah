@@ -21,8 +21,14 @@
                     <?php endif; ?>
 
                     <form action="<?= base_url('/profile/update') ?>" method="post" enctype="multipart/form-data">
-                        <?= csrf_field() ?> <div class="text-center mb-4">
-                            <img src="<?= base_url('uploads/users/' . ($user['foto'] ?? 'default.png')) ?>"
+                        <?= csrf_field() ?>
+
+                        <div class="text-center mb-4">
+                            <?php
+                            $fotoSekarang = (isset($user['foto']) && $user['foto'] != '') ? $user['foto'] : session()->get('foto');
+                            if (!$fotoSekarang) $fotoSekarang = 'default.png';
+                            ?>
+                            <img src="<?= base_url('uploads/users/' . $fotoSekarang) ?>"
                                 class="rounded-circle img-thumbnail shadow-sm mb-3"
                                 width="120" height="120" style="object-fit: cover; border: 3px solid #fff;">
 
@@ -38,15 +44,18 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Nama Lengkap</label>
-                                <input type="text" name="nama" class="form-control rounded-3" value="<?= esc($user['nama'] ?? '') ?>" required>
+                                <input type="text" name="nama" class="form-control rounded-3"
+                                    value="<?= esc($user['nama'] ?? session()->get('nama')) ?>" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Email</label>
-                                <input type="email" name="email" class="form-control rounded-3" value="<?= esc($user['email'] ?? '') ?>" required>
+                                <input type="email" name="email" class="form-control rounded-3"
+                                    value="<?= esc($user['email'] ?? session()->get('email')) ?>" required>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label small fw-bold">Password Baru</label>
-                                <input type="password" name="password" class="form-control rounded-3" placeholder="Kosongkan jika tidak ingin mengganti password">
+                                <input type="password" name="password" class="form-control rounded-3"
+                                    placeholder="Kosongkan jika tidak ingin mengganti password">
                                 <div class="form-text small text-muted">Minimal 4 karakter jika ingin mengganti.</div>
                             </div>
                         </div>
@@ -61,5 +70,14 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('foto').onchange = function(evt) {
+        const [file] = this.files
+        if (file) {
+            document.querySelector('.img-thumbnail').src = URL.createObjectURL(file)
+        }
+    }
+</script>
 
 <?= $this->endSection() ?>
