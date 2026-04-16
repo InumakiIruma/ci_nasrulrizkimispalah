@@ -66,3 +66,9 @@ $routes->group('users', $authFilter, function ($routes) {
     $routes->get('/', 'Users::index');
     $routes->get('hapus/(:num)', 'Users::hapus/$1');
 });
+// Tambahkan di dalam file Routes.php
+$routes->group('notifikasi', $authFilter, function ($routes) {
+    $routes->get('/', 'Notifikasi::index'); // Halaman daftar notifikasi
+    $routes->get('read/(:num)', 'Notifikasi::read/$1'); // Tandai sudah dibaca
+    $routes->get('hapus/(:num)', 'Notifikasi::hapus/$1'); // Hapus notifikasi
+});

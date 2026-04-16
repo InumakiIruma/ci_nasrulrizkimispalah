@@ -9,11 +9,25 @@ class Peminjaman extends BaseController
 {
     protected $alatModel;
     protected $peminjamanModel;
+    protected $db; // Tambahan properti DB
 
     public function __construct()
     {
+        $this->db = \Config\Database::connect(); // Inisialisasi DB
         $this->alatModel = new AlatModel();
         $this->peminjamanModel = new PeminjamanModel();
+    }
+
+    /**
+     * FUNGSI TAMBAHAN: Simpan ke tabel notifikasi
+     */
+    private function simpanNotif($id_user, $pesan)
+    {
+        $this->db->table('notifikasi')->insert([
+            'id_user' => $id_user,
+            'pesan'   => $pesan,
+            'is_read' => 0
+        ]);
     }
 
     /**
@@ -47,16 +61,38 @@ class Peminjaman extends BaseController
             return redirect()->back()->with('error', 'Jumlah pinjam melebihi stok yang tersedia.');
         }
 
-        $this->peminjamanModel->save([
+        // Ambil ID User dari Session
+        $id_user_peminjam = session()->get('id') ?? session()->get('id_user');
+
+        $dataSimpan = [
             'id_alat'       => $id_alat,
+            'id_user'       => $id_user_peminjam, // Pastikan kolom id_user ada di tabel peminjaman
             'nama_peminjam' => $nama,
             'tgl_pinjam'    => $this->request->getPost('tgl_pinjam'),
             'tgl_kembali'   => $this->request->getPost('tgl_kembali'),
             'jumlah'        => $jumlah,
             'status'        => 'pending'
-        ]);
+        ];
 
-        return redirect()->to('/peminjaman')->with('success', 'Permintaan pinjam berhasil dikirim.');
+        if ($this->peminjamanModel->save($dataSimpan)) {
+            $namaAlat = $alat['nama_alat'];
+
+            // NOTIF UNTUK USER (Peminjam)
+            if ($id_user_peminjam) {
+                $this->simpanNotif($id_user_peminjam, "Anda telah mengajukan peminjaman alat: $namaAlat. Silakan tunggu konfirmasi admin.");
+            }
+
+            // NOTIF UNTUK SEMUA ADMIN
+            $adminList = $this->db->table('users')->where('role', 'admin')->get()->getResultArray();
+            foreach ($adminList as $admin) {
+                $this->simpanNotif($admin['id'], "Permintaan Baru: $nama ingin meminjam $namaAlat ($jumlah unit).");
+            }
+
+            return redirect()->to('/peminjaman')
+                ->with('success', 'Peminjaman alat berhasil diajukan! Admin telah dinotifikasi.');
+        }
+
+        return redirect()->back()->with('error', 'Gagal mengajukan peminjaman.');
     }
 
     /**
@@ -80,8 +116,7 @@ class Peminjaman extends BaseController
      */
     public function konfirmasi($id)
     {
-        $db = \Config\Database::connect();
-        $db->transStart(); // Database Transaction agar data aman
+        $this->db->transStart();
 
         $dataPinjam = $this->peminjamanModel->find($id);
 
@@ -92,23 +127,26 @@ class Peminjaman extends BaseController
         $alat = $this->alatModel->find($dataPinjam['id_alat']);
 
         if ($alat['stok'] >= $dataPinjam['jumlah']) {
-            // A. Update status peminjaman
             $this->peminjamanModel->update($id, [
                 'status'     => 'dipinjam',
                 'tgl_pinjam' => date('Y-m-d H:i:s')
             ]);
 
-            // B. Kurangi stok alat
             $stokBaru = $alat['stok'] - $dataPinjam['jumlah'];
             $this->alatModel->update($dataPinjam['id_alat'], ['stok' => $stokBaru]);
 
-            $db->transComplete();
+            // NOTIF UNTUK USER: Bahwa pinjaman disetujui
+            if (!empty($dataPinjam['id_user'])) {
+                $this->simpanNotif($dataPinjam['id_user'], "Peminjaman alat " . $alat['nama_alat'] . " telah DISETUJUI. Silakan ambil barang.");
+            }
 
-            if ($db->transStatus() === FALSE) {
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === FALSE) {
                 return redirect()->back()->with('error', 'Gagal memproses data.');
             }
 
-            return redirect()->to('/peminjaman/permintaan')->with('success', 'Peminjaman disetujui, stok berkurang.');
+            return redirect()->to('/peminjaman/permintaan')->with('success', 'Peminjaman disetujui.');
         } else {
             return redirect()->back()->with('error', 'Stok alat tidak mencukupi!');
         }
@@ -138,20 +176,23 @@ class Peminjaman extends BaseController
         $dataPinjam = $this->peminjamanModel->find($id);
 
         if (!$dataPinjam || strtolower($dataPinjam['status']) !== 'dipinjam') {
-            return redirect()->to('/peminjaman/pengembalian')->with('error', 'Data tidak ditemukan atau sudah dikembalikan.');
+            return redirect()->to('/peminjaman/pengembalian')->with('error', 'Data tidak ditemukan.');
         }
 
-        // A. Update status peminjaman
         $this->peminjamanModel->update($id, [
             'status'      => 'selesai',
             'tgl_kembali' => date('Y-m-d H:i:s')
         ]);
 
-        // B. Tambahkan kembali stok alat
         $alat = $this->alatModel->find($dataPinjam['id_alat']);
         if ($alat) {
             $stokBaru = $alat['stok'] + $dataPinjam['jumlah'];
             $this->alatModel->update($dataPinjam['id_alat'], ['stok' => $stokBaru]);
+
+            // NOTIF UNTUK USER: Bahwa barang sudah kembali
+            if (!empty($dataPinjam['id_user'])) {
+                $this->simpanNotif($dataPinjam['id_user'], "Pengembalian alat " . $alat['nama_alat'] . " telah diterima. Terima kasih!");
+            }
         }
 
         return redirect()->to('/peminjaman/pengembalian')->with('success', 'Alat berhasil dikembalikan.');
@@ -187,15 +228,21 @@ class Peminjaman extends BaseController
         $data['title'] = "Detail Peminjaman";
         return view('peminjaman/detail', $data);
     }
+
     public function tolak($id)
     {
         $dataPinjam = $this->peminjamanModel->find($id);
 
         if ($dataPinjam && $dataPinjam['status'] == 'pending') {
-            // Opsi 1: Langsung hapus datanya
-            $this->peminjamanModel->delete($id);
+            $alat = $this->alatModel->find($dataPinjam['id_alat']);
 
-            return redirect()->to('/peminjaman/permintaan')->with('success', 'Permintaan peminjaman telah ditolak.');
+            // NOTIF UNTUK USER: Bahwa pinjaman ditolak
+            if (!empty($dataPinjam['id_user'])) {
+                $this->simpanNotif($dataPinjam['id_user'], "Maaf, permintaan pinjam " . ($alat['nama_alat'] ?? 'alat') . " DITOLAK.");
+            }
+
+            $this->peminjamanModel->delete($id);
+            return redirect()->to('/peminjaman/permintaan')->with('success', 'Permintaan telah ditolak.');
         }
 
         return redirect()->back()->with('error', 'Gagal memproses penolakan.');

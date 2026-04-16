@@ -5,7 +5,7 @@
                 <i class="bi bi-yelp text-white"></i>
             </div>
             <span class="brand-text text-dark text-truncate">
-                <span class="fw-bold fs-5">Maldin17</span>App
+                <span class="fw-bold fs-5">PinjamDulu</span>App
             </span>
         </a>
     </div>
@@ -48,6 +48,20 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link <?= (uri_string() == 'notifikasi') ? 'active' : '' ?>" href="<?= base_url('notifikasi') ?>">
+                <div class="position-relative me-2">
+                    <i class="bi bi-bell-fill"></i>
+                    <?php if (isset($totalNotif) && $totalNotif > 0) : ?>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.25em 0.5em;">
+                            <?= $totalNotif ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <span class="text-truncate">Notifikasi</span>
+            </a>
+        </li>
+
         <div class="nav-divider">Transaksi</div>
 
         <li class="nav-item">
@@ -70,7 +84,7 @@
 
             <li class="nav-item">
                 <a class="nav-link <?= (uri_string() == 'peminjaman/permintaan') ? 'active' : '' ?>" href="<?= base_url('peminjaman/permintaan') ?>">
-                    <i class="bi bi-bell-fill flex-shrink-0"></i>
+                    <i class="bi bi-envelope-paper-fill flex-shrink-0"></i>
                     <span class="text-truncate">Permintaan Pinjam</span>
                 </a>
             </li>
@@ -124,7 +138,7 @@
 </div>
 
 <style>
-    /* Styling tetap sama sesuai code yang kamu berikan agar desain tidak berubah */
+    /* Styling tetap sama agar desain tidak berubah */
     .sidebar-wrapper {
         background-color: #ffffff !important;
         min-height: 100vh;
