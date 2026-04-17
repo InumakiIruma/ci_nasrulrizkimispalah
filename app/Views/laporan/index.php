@@ -63,15 +63,19 @@
                             <th>Alat</th>
                             <th>Status</th>
                             <th>Tgl Kembali</th>
+                            <th class="d-print-none text-center">Share</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($laporan)) : ?>
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">Tidak ada data transaksi pada periode ini.</td>
+                                <td colspan="7" class="text-center py-4 text-muted">Tidak ada data transaksi pada periode ini.</td>
                             </tr>
                             <?php else : $no = 1;
-                            foreach ($laporan as $row) : ?>
+                            foreach ($laporan as $row) :
+                                // Format pesan WhatsApp
+                                $wa_text = "Laporan Peminjaman Alat:%0A- Nama: " . $row['nama_peminjam'] . "%0A- Alat: " . $row['nama_alat'] . "%0A- Status: " . $row['status'];
+                            ?>
                                 <tr>
                                     <td><?= $no++ ?></td>
                                     <td><?= date('d/m/Y', strtotime($row['tgl_pinjam'])) ?></td>
@@ -83,6 +87,16 @@
                                         </span>
                                     </td>
                                     <td><?= ($row['tgl_kembali']) ? date('d/m/Y', strtotime($row['tgl_kembali'])) : '-' ?></td>
+                                    <td class="d-print-none text-center">
+                                        <div class="btn-group shadow-sm rounded-pill overflow-hidden" style="border: 1px solid #dee2e6;">
+                                            <a href="https://api.whatsapp.com/send?text=<?= $wa_text ?>" target="_blank" class="btn btn-white btn-sm border-0 px-2" title="Share ke WhatsApp">
+                                                <i class="bi bi-whatsapp text-success"></i>
+                                            </a>
+                                            <button onclick="copyShareLink('<?= $row['nama_peminjam'] ?>', '<?= $row['nama_alat'] ?>')" class="btn btn-white btn-sm border-0 px-2 border-start" title="Salin untuk Instagram">
+                                                <i class="bi bi-instagram text-danger"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                         <?php endforeach;
                         endif; ?>
@@ -92,6 +106,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    function copyShareLink(peminjam, alat) {
+        const textToCopy = `Laporan Peminjaman: ${peminjam} meminjam ${alat}. Cek detailnya di aplikasi!`;
+        const tempInput = document.createElement("input");
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        // Notifikasi sederhana (Bisa diganti Swal jika sudah ada SweetAlert2 di layout)
+        alert('Teks laporan berhasil disalin! Silakan paste di Instagram.');
+    }
+</script>
 
 <style>
     @media print {
@@ -117,6 +146,16 @@
             border: none !important;
             shadow: none !important;
         }
+    }
+
+    /* Style tambahan untuk tombol share agar senada */
+    .btn-white {
+        background: #fff;
+        transition: background 0.2s;
+    }
+
+    .btn-white:hover {
+        background: #f8f9fa;
     }
 </style>
 

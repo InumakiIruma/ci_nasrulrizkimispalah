@@ -12,7 +12,7 @@
     <div class="row">
         <div class="col-12">
             <h3 class="fw-bold text-dark">Dashboard Pengelola</h3>
-            <p class="text-muted">Selamat datang di <b>Maldin17</b>App! Berikut adalah ringkasan sistem hari ini.</p>
+            <p class="text-muted">Selamat datang di <b>PinjamDulu</b>App! Berikut adalah ringkasan sistem hari ini.</p>
             <hr>
         </div>
     </div>

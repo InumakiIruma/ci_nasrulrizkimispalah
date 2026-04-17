@@ -2,10 +2,40 @@
 <?= $this->section('content') ?>
 
 <div class="container mt-4 pb-5">
-    <div class="row mb-4">
-        <div class="col-lg-8">
+    <div class="row mb-4 align-items-end">
+        <div class="col-lg-5">
             <h3 class="fw-bold text-dark"><i class="bi bi-cart-plus me-2 text-primary"></i>Pilih Alat untuk Dipinjam</h3>
-            <p class="text-muted">Katalog alat tersedia. Silakan pilih item yang ingin Anda pinjam.</p>
+            <p class="text-muted mb-0">Katalog alat tersedia. Silakan pilih item yang ingin Anda pinjam.</p>
+        </div>
+        <div class="col-lg-7 mt-3 mt-lg-0">
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden border">
+                        <span class="input-group-text bg-white border-0 ps-3">
+                            <i class="bi bi-filter text-primary"></i>
+                        </span>
+                        <select id="categoryFilter" class="form-select border-0 py-2" style="box-shadow: none; cursor: pointer;">
+                            <option value="">Semua Kategori</option>
+                            <?php
+                            // Mengambil daftar kategori unik dari array alat
+                            $categories = array_unique(array_column($alat, 'kategori'));
+                            sort($categories);
+                            foreach ($categories as $cat) :
+                            ?>
+                                <option value="<?= strtolower($cat); ?>"><?= $cat; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden border">
+                        <span class="input-group-text bg-white border-0 ps-3">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control border-0 py-2" placeholder="Cari nama alat...">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -29,9 +59,9 @@
         </div>
     <?php endif; ?>
 
-    <div class="row">
+    <div class="row" id="alatContainer">
         <?php foreach ($alat as $a): ?>
-            <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="col-sm-6 col-md-4 col-lg-3 mb-4 item-alat">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-hover">
                     <div class="bg-light d-flex align-items-center justify-content-center position-relative" style="height: 180px;">
                         <i class="bi bi-tools text-muted opacity-25" style="font-size: 4rem;"></i>
@@ -49,14 +79,14 @@
 
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill small fw-bold">
+                            <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill small fw-bold kategori-alat">
                                 <?= $a['kategori']; ?>
                             </span>
                             <small class="<?= ($a['stok'] > 0) ? 'text-muted' : 'text-danger fw-bold' ?>">
                                 <i class="bi bi-box-seam me-1"></i> Stok: <?= $a['stok']; ?>
                             </small>
                         </div>
-                        <h5 class="card-title fw-bold mb-1 text-dark text-truncate"><?= $a['nama_alat']; ?></h5>
+                        <h5 class="card-title fw-bold mb-1 text-dark text-truncate nama-alat"><?= $a['nama_alat']; ?></h5>
                         <p class="text-muted small mb-0">Klik tombol di bawah untuk memproses peminjaman.</p>
                     </div>
 
@@ -72,6 +102,11 @@
                 </div>
             </div>
         <?php endforeach; ?>
+    </div>
+
+    <div id="noResults" class="text-center py-5 d-none">
+        <i class="bi bi-search-heart fs-1 text-muted"></i>
+        <p class="mt-2 text-muted">Maaf, alat yang Anda cari tidak ditemukan.</p>
     </div>
 </div>
 
@@ -136,15 +171,50 @@
 </div>
 
 <script>
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const items = document.querySelectorAll('.item-alat');
+    const noResults = document.getElementById('noResults');
+
+    // FUNGSI FILTER GABUNGAN (SEARCH & CATEGORY)
+    function filterAlat() {
+        const keyword = searchInput.value.toLowerCase();
+        const selectedCat = categoryFilter.value.toLowerCase();
+        let hasVisibleItems = false;
+
+        items.forEach(item => {
+            const nama = item.querySelector('.nama-alat').textContent.toLowerCase();
+            const kategori = item.querySelector('.kategori-alat').textContent.toLowerCase().trim();
+
+            const matchSearch = nama.includes(keyword);
+            const matchCategory = selectedCat === "" || kategori === selectedCat;
+
+            if (matchSearch && matchCategory) {
+                item.style.display = 'block';
+                hasVisibleItems = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        if (hasVisibleItems) {
+            noResults.classList.add('d-none');
+        } else {
+            noResults.classList.remove('d-none');
+        }
+    }
+
+    // Listener untuk Input & Dropdown
+    searchInput.addEventListener('input', filterAlat);
+    categoryFilter.addEventListener('change', filterAlat);
+
+    // FUNGSI MODAL
     function setAlat(id, nama, stok) {
         document.getElementById('id_alat').value = id;
         document.getElementById('nama_alat_display').value = nama;
-
-        // Update validasi jumlah berdasarkan stok tersedia
         const inputJumlah = document.getElementById('jumlah_input');
         inputJumlah.max = stok;
-        inputJumlah.value = 1; // reset ke 1
-
+        inputJumlah.value = 1;
         document.getElementById('stok_info').innerText = "* Maksimal pinjam: " + stok + " item";
     }
 </script>
@@ -174,6 +244,11 @@
 
     .btn:active {
         transform: scale(0.96);
+    }
+
+    /* Perbaikan tampilan select agar tidak kaku */
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234361ee' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     }
 </style>
 
