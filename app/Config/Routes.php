@@ -22,7 +22,7 @@ $routes->get('/dashboard', 'Home::index', $authFilter);
 $routes->get('/profile', 'Users::profile', $authFilter);
 $routes->post('/profile/update', 'Users::updateProfile', $authFilter);
 
-// --- Tambahan: Route Akses Publik (Penting agar tombol di Login jalan) ---
+// --- Tambahan: Route Akses Publik ---
 $routes->get('users/create', 'Users::create');
 $routes->post('users/store', 'Users::store');
 
@@ -30,6 +30,9 @@ $routes->post('users/store', 'Users::store');
 $routes->group('alat', $authFilter, function ($routes) {
     $routes->get('/', 'Alat::index');
     $routes->post('simpan', 'Alat::simpan');
+    // Tambahan Route Edit Alat di sini agar sinkron
+    $routes->get('edit/(:num)', 'Alat::edit/$1');
+    $routes->post('update/(:num)', 'Alat::update/$1');
 });
 
 // --- 6. Kategori Alat ---
@@ -61,14 +64,15 @@ $routes->group('laporan', $authFilter, function ($routes) {
     $routes->get('filter', 'Laporan::index');
 });
 
-// --- 9. Manajemen User (Hanya yang butuh Login) ---
+// --- 9. Manajemen User ---
 $routes->group('users', $authFilter, function ($routes) {
     $routes->get('/', 'Users::index');
     $routes->get('hapus/(:num)', 'Users::hapus/$1');
 });
-// Tambahkan di dalam file Routes.php
+
+// --- 10. Notifikasi ---
 $routes->group('notifikasi', $authFilter, function ($routes) {
-    $routes->get('/', 'Notifikasi::index'); // Halaman daftar notifikasi
-    $routes->get('read/(:num)', 'Notifikasi::read/$1'); // Tandai sudah dibaca
-    $routes->get('hapus/(:num)', 'Notifikasi::hapus/$1'); // Hapus notifikasi
+    $routes->get('/', 'Notifikasi::index');
+    $routes->get('read/(:num)', 'Notifikasi::read/$1');
+    $routes->get('hapus/(:num)', 'Notifikasi::hapus/$1');
 });

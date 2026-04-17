@@ -1,6 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="container mt-4">
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
@@ -53,11 +56,11 @@
                                         <span class="badge rounded-pill bg-secondary px-3"><?= $row['jumlah'] ?> Unit</span>
                                     </td>
                                     <td class="text-center pe-4">
-                                        <a href="<?= base_url('peminjaman/kembalikan/' . $row['id']) ?>"
+                                        <button type="button"
                                             class="btn btn-success btn-sm rounded-pill px-4 shadow-sm"
-                                            onclick="return confirm('Apakah Anda yakin alat ini sudah dikembalikan?')">
+                                            onclick="konfirmasiKembali('<?= base_url('peminjaman/kembalikan/' . $row['id']) ?>')">
                                             <i class="bi bi-check2-circle me-1"></i> Kembalikan
-                                        </a>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -68,5 +71,26 @@
         </div>
     </div>
 </div>
+
+<script>
+    function konfirmasiKembali(url) {
+        Swal.fire({
+            title: 'Konfirmasi Pengembalian',
+            text: "Apakah Anda yakin alat ini sudah dikembalikan?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#198754', // Warna hijau Bootstrap success
+            cancelButtonColor: '#6c757d', // Warna abu-abu Bootstrap secondary
+            confirmButtonText: 'Ya, Sudah Kembali',
+            cancelButtonText: 'Belum',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Jika user klik "Ya", arahkan ke link pengembalian
+                window.location.href = url;
+            }
+        })
+    }
+</script>
 
 <?= $this->endSection() ?>
